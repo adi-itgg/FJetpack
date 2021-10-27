@@ -1,0 +1,5 @@
+# Don't change VERSION!
+Version: 1.4
+
+# Disable Enable Update Notification
+UpdateNotification: true

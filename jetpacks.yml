@@ -1,0 +1,74 @@
+Jetpacks:
+  # ID for jetpack item
+  VIP:
+    # Display the item name
+    DisplayName: '&8&l[&b&lFJetpack&8&l]'
+    # Lore item
+    Lore:
+      - '&3&m&l----===[&r &8 &b&lINFO &8 &3&m&l]===----'
+      - '&9Rank: &6&lVIP'
+      - ''
+      - '&3&m&l----===[&b &lUSAGE &3&m&l]===----'
+      - '&9Sneak to toggle on/off'
+      - '&9Double jump to fly'
+      - ''
+      # You can remove this lore or change the lore.
+      - '&7Fuel: &a{#fuel_value} &b{#fuel}'
+    Permission: fjetpack.vip
+    # Jetpack Item (Supports all armor items)
+    JetpackItem: CHAINMAIL_CHESTPLATE
+    # Unbreakable item?
+    Unbreakable: true
+    # Fuel Item Material
+    Fuel: Dirt
+    # Fuel Cost
+    FuelCost: 1
+    # Fuel Burn Rate in seconds
+    BurnRate: 5
+    # Maximum speed value is -10 to 10!
+    Speed: 1.0
+    # if you don't want to use particle set to 'none'
+    # if particle doesn't support or error, this plugin will automatically replace particle effect to CLOUD!
+    ParticleEffect: CLOUD
+    # Amount of particle
+    ParticleAmount: 0
+    # Particle delay in ticks
+    ParticleDelay: 2
+    # if you don't want to use flags set to 'none'
+    # example Flags: 'none'
+    Flags:
+      - HIDE_ATTRIBUTES
+      - HIDE_ENCHANTS
+    # if you don't want to use enchantment set to 'none'
+    # example Enchantment: 'none'
+    Enchantments:
+      # enchant under version 1.17 server use old method enchantments, like - "DURABILITY:3"
+      - "unbreaking:3" # for newer server version 1.17+
+    # Disable world
+    WorldBlackList:
+      - world1
+  Member:
+    DisplayName: '&8&l[&b&lFJetpack&8&l]'
+    Lore:
+      - '&3&m&l----===[&r &8 &b&lINFO &8 &3&m&l]===----'
+      - '&9Rank: &f&lMember'
+      - ''
+      - '&3&m&l----===[&b &lUSAGE &3&m&l]===----'
+      - '&9Sneak to toggle on/off'
+      - '&9Double jump to fly'
+    Permission: fjetpack.member
+    JetpackItem: LEATHER_CHESTPLATE
+    Unbreakable: false
+    Fuel: Coal
+    FuelCost: 1
+    BurnRate: 5
+    Speed: 1.0
+    ParticleEffect: 'none'
+    ParticleAmount: 0
+    ParticleDelay: 2
+    Flags:
+      - HIDE_ATTRIBUTES
+      - HIDE_ENCHANTS
+    Enchantments: 'none'
+    WorldBlackList:
+      - world1

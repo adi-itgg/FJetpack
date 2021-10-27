@@ -1,0 +1,9 @@
+Messages:
+  Prefix: "&8&l[&b&lFJetpack&8&l]&r "
+  JetpackOn: "&a&lON"
+  JetpackOff: "&4&lOFF"
+  NoPerm: "&cYou don't have permission!"
+  NeedFuel: "&cYou don't have fuel to fly!"
+  WorldBlocked: "&cYou can't use Jetpack in this World!"
+  JetpackRemoved: "&cYou take off your Jetpack, making you fall to the ground"
+  NoFuel: "&cYou are out of fuel!"

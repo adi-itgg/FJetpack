@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="FJetpack">
+    <output-path>$PROJECT_DIR$/out/artifacts/FJetpack</output-path>
+    <root id="archive" name="FJetpack.jar">
+      <element id="file-copy" path="$PROJECT_DIR$/plugin.yml" />
+      <element id="file-copy" path="$PROJECT_DIR$/config.yml" />
+      <element id="module-output" name="FJetpack" />
+      <element id="file-copy" path="$PROJECT_DIR$/messages.yml" />
+      <element id="file-copy" path="$PROJECT_DIR$/jetpacks.yml" />
+    </root>
+  </artifact>
+</component>
