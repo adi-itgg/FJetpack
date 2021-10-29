@@ -329,7 +329,6 @@ public class JetpackEvents extends JetpackManager implements Listener {
                                 return;
                             }
                             p.getEquipment().setArmorContents(updateItemsFJP(armors, eqc));
-                            //eq.setChestplate(eqc);
                         } catch (Exception e) {
                             e.printStackTrace();
                             //PCopot(p);

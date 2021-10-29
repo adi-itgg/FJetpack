@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.craftbukkit.libs.org.eclipse.sisu.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -15,63 +16,48 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static me.phantomxcraft.utils.Fungsi.STRING_EMPTY;
+import static me.phantomxcraft.utils.Fungsi.PERM_STRING;
 
 public class TapTab implements TabCompleter {
-    public static final List<String> ListCommand = new ArrayList<>(Arrays.asList("Get", "Give", "Reload", "CheckUpdate", "Set"));
+    public static final List<String> ListCommand = new ArrayList<>(Arrays.asList("Set", "Get", "Give", "Reload", "CheckUpdate"));
 
-    public List<String> onTabComplete(CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (sender.isOp() || sender.hasPermission("fjetpack.admin") || sender.hasPermission("fjetpack." + args[0])) {
-            List<String> completions = new ArrayList<>();
-            if (args.length == 1) {
-                String partialCommand = args[0];
-                StringUtil.copyPartialMatches(partialCommand, ListCommand, completions);
-            }
-
-            if (args[0].equalsIgnoreCase("get") || args[0].equalsIgnoreCase("give")) {
-                if (args.length == 2) {
-                    String partialPlayer = args[1];
-
-                    StringBuilder sB = new StringBuilder();
-                    for(Player player : Bukkit.getOnlinePlayers()){
-                        sB.append(player.getName()).append(", ");
-                        String displayName = player.getDisplayName();
-                        if (!displayName.equalsIgnoreCase(player.getName()) && displayName.length() < 1)
-                            sB.append(displayName).append(", ");
-                    }
-                    completions = JetpackList(completions, partialPlayer, sB);
-                }
-
-                if (args.length == 3) {
-
-                    Jetpack jetpack = JetpackManager.jetpacksLoaded.get(args[1]);
-
-                    if (jetpack == null) {
-                        String partialJp = args[2];
-                        StringBuilder sB = new StringBuilder();
-                        completions = JetpackList(completions, partialJp, sB);
-                    }
-                }
-            }
-
-            if (args[0].equalsIgnoreCase("set") && args.length == 2) {
-                StringBuilder sB = new StringBuilder();
-                completions = JetpackList(completions, args[1], sB);
-            }
-
-            Collections.sort(completions);
-            return completions;
-        } else {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if (!sender.isOp() || !sender.hasPermission(PERM_STRING + "admin") || !sender.hasPermission(PERM_STRING + args[0]))
             return null;
+
+        List<String> completions = new ArrayList<>();
+        if (args.length == 1)
+            StringUtil.copyPartialMatches(args[0], ListCommand, completions);
+
+        if (args[0].equalsIgnoreCase(ListCommand.get(1)) || args[0].equalsIgnoreCase(ListCommand.get(2))) {
+            if (args.length == 2) {
+                List<String> cmds = new ArrayList<>();
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    cmds.add(player.getName());
+                    String displayName = player.getDisplayName();
+                    if (!displayName.equalsIgnoreCase(player.getName()) && displayName.length() < 1)
+                        cmds.add(displayName);
+                }
+                completions = JetpackList(completions, args[1], cmds);
+            }
+
+            if (args.length == 3) {
+                Jetpack jetpack = JetpackManager.jetpacksLoaded.get(args[1]);
+                if (jetpack == null)
+                    completions = JetpackList(completions, args[2], null);
+            }
         }
+
+        if (args[0].equalsIgnoreCase(ListCommand.get(0)) && args.length == 2)
+            completions = JetpackList(completions, args[1], null);
+
+        Collections.sort(completions);
+        return completions;
     }
 
-    public static List<String> JetpackList(List<String> completions, String partialPlayer, StringBuilder sB) {
-        for (String jetpackName : JetpackManager.jetpacksLoaded.keySet())
-            sB.append(sB.length() < 1 ? STRING_EMPTY : ", ").append(jetpackName);
-
-
-        List<String> players = new ArrayList<>(Arrays.asList(sB.toString().split(", ")));
-        return StringUtil.copyPartialMatches(partialPlayer, players, completions);
+    private @NotNull List<String> JetpackList(@NotNull List<String> completions, @NotNull String token, @Nullable List<String> cmdSuggestions) {
+        if (cmdSuggestions == null) cmdSuggestions = new ArrayList<>();
+        cmdSuggestions.addAll(JetpackManager.jetpacksLoaded.keySet());
+        return StringUtil.copyPartialMatches(token, cmdSuggestions, completions);
     }
 }

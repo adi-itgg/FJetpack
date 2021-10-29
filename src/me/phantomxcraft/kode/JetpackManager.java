@@ -37,7 +37,6 @@ public class JetpackManager {
 
     public static Map<String, Jetpack> jetpacksLoaded = new HashMap<>();
 
-
     public static Server getServer() {
         return Bukkit.getServer();
     }
@@ -45,7 +44,7 @@ public class JetpackManager {
         return getPlugin().getConfig();
     }
     public static Plugin getPlugin() {
-        return Bukkit.getPluginManager().getPlugin("FJetpack");
+        return Bukkit.getPluginManager().getPlugin(GET_JETPACK_NAME);
     }
     public static Logger getLogger() {
         return Bukkit.getLogger();

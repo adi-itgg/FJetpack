@@ -23,10 +23,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -42,17 +41,17 @@ public class FJetpack extends JavaPlugin implements Listener {
 
         try {
             nmsServerVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-            consoleCommandSender.sendMessage(ChatColor.GOLD + "Detected Server: " + ChatColor.GREEN + Bukkit.getName() + " " + Bukkit.getVersion()/* + " [" + nmsServerVersion + "]"*/);
+            consoleCommandSender.sendMessage(ChatColor.GOLD + "Detected Server: " + ChatColor.GREEN + Bukkit.getName() + " " + Bukkit.getVersion());
         } catch (ArrayIndexOutOfBoundsException whatVersionAreYouUsingException) {
             whatVersionAreYouUsingException.printStackTrace();
-            consoleCommandSender.sendMessage(ChatColor.RED + "Unknown Server: " + ChatColor.GREEN + Bukkit.getName() + " " + Bukkit.getVersion()/* + " [" + nmsServerVersion + "]"*/);
+            consoleCommandSender.sendMessage(ChatColor.RED + "Unknown Server: " + ChatColor.GREEN + Bukkit.getName() + " " + Bukkit.getVersion());
             consoleCommandSender.sendMessage(ChatColor.RED + "This plugin will not work because this server has unknown version!");
         }
 
         JetpackEvents.CekUpdate(consoleCommandSender);
         JetpackManager.reloadMe(consoleCommandSender);
         getServer().getPluginManager().registerEvents(new JetpackEvents(), this);
-        PluginCommand pluginCommand = getCommand("fj");
+        PluginCommand pluginCommand = getCommand(GET_JETPACK_NAME.substring(0, 2));
         if (pluginCommand == null) {
             getLogger().log(Level.WARNING, "Failed To Set Tab Completer!");
             return;
@@ -71,82 +70,62 @@ public class FJetpack extends JavaPlugin implements Listener {
         JetpackManager.jetpacksLoaded.clear();
     }
 
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, String label, @NotNull String[] args) {
-        if (!label.equalsIgnoreCase("fjetpack") && !label.equalsIgnoreCase("fj")) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if (!label.equalsIgnoreCase(GET_JETPACK_NAME) && !label.equalsIgnoreCase(GET_JETPACK_NAME.substring(0, 2)))
             return false;
-        }
+
 
         boolean notContainsCmd = true;
-        if (args.length > 0) {
+        if (args.length > 0)
             for (String cmd : ListCommand) {
                 if (!cmd.equalsIgnoreCase(args[0])) continue;
                 notContainsCmd = false;
                 break;
             }
-        }
+
 
         if (args.length == 0 || args[0].equalsIgnoreCase("help") || notContainsCmd) {
-            if (sender.hasPermission("FJetpack.Help")) {
-                sender.sendMessage("§8");
-                sender.sendMessage("§7--------------------- [ §3FJetpack§7 ] --------------------");
-                sender.sendMessage("§bAll Command List");
-                sender.sendMessage("§8");
-                sender.sendMessage("§8§l- §3/fj [Get|Give] (Player) [Jetpack] §r- §bGet/Give a Jetpack");
-                sender.sendMessage("§8§l- §3/fj Set [Jetpack] §r- §bSet Jetpack in hand");
-                sender.sendMessage("§8§l- §3/fj Reload §r- §bReload Config Plugin");
-                sender.sendMessage("§8§l- §3/fj CheckUpdate §r- §bCheck Update Plugin");
-                sender.sendMessage("§8");
-                sender.sendMessage("§3Made by §aPhantomXCraft");
-                sender.sendMessage("§3Version: §bv" + this.getDescription().getVersion());
-                sender.sendMessage("§7--------------------- [ §3FJetpack§7 ] --------------------");
-                sender.sendMessage("§8");
-            } else {
+            if (sender.hasPermission(PERM_STRING + "Help")) {
+                InputStream is = getResource("help.txt");
+                if (is == null) return true;
+                Scanner s = new Scanner(is);
+                while(s.hasNextLine())
+                    sender.sendMessage(String.format(translateCodes(s.nextLine()), this.getDescription().getVersion()));
+                s.close();
+            } else
                 sender.sendMessage(JetpackManager.PrefixPesan + JetpackManager.TidakAdaAkses);
-            }
             return true;
         }
 
-        if (args[0].equalsIgnoreCase("reload")) {
-            if (sender.hasPermission("FJetpack.Reload")) {
+        if (args[0].equalsIgnoreCase(ListCommand.get(3))) {
+            if (sender.hasPermission(PERM_STRING + ListCommand.get(3))) {
                 JetpackManager.reloadMe(sender);
                 sender.sendMessage(JetpackManager.PrefixPesan + "§aReload Config Success!");
-            } else {
+            } else
                 sender.sendMessage(JetpackManager.PrefixPesan + JetpackManager.TidakAdaAkses);
-            }
             return true;
         }
 
-        if (args[0].equalsIgnoreCase("get") || args[0].equalsIgnoreCase("give")) {
-            if (sender.hasPermission("FJetpack.Get") || sender.hasPermission("FJetpack.Give")) {
+        if (args[0].equalsIgnoreCase(ListCommand.get(1)) || args[0].equalsIgnoreCase(ListCommand.get(2))) {
+            if (sender.hasPermission(PERM_STRING + ListCommand.get(1)) || sender.hasPermission(PERM_STRING + ListCommand.get(2))) {
 
                 if (args.length == 2) {
                     if (!(sender instanceof Player)) {
                         sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "You can't run this command from Console!");
                         return true;
                     }
-                    try {
-
-                        Jetpack jetpack = JetpackManager.jetpacksLoaded.get(args[1]);
-                        if (jetpack != null) {
-                            AmbilJP(sender, (Player) sender, jetpack);
-                            return true;
-                        }
-
-                    } catch (Exception ett) {
-                        ett.printStackTrace();
+                    Jetpack jetpack = JetpackManager.jetpacksLoaded.get(args[1]);
+                    if (jetpack != null) {
+                        AmbilJP(sender, (Player) sender, jetpack);
+                        return true;
                     }
 
-                } else if (args.length == 3) {
-                    try {
-
-                        Jetpack jetpack = JetpackManager.jetpacksLoaded.get(args[2]);
-                        if (jetpack != null) {
-                            AmbilJP(sender, Bukkit.getPlayerExact(args[1]), jetpack);
-                            return true;
-                        }
-
-                    } catch (Exception ett) {
-                        ett.printStackTrace();
+                }
+                if (args.length == 3) {
+                    Jetpack jetpack = JetpackManager.jetpacksLoaded.get(args[2]);
+                    if (jetpack != null) {
+                        AmbilJP(sender, Bukkit.getPlayerExact(args[1]), jetpack);
+                        return true;
                     }
                 }
 
@@ -160,13 +139,13 @@ public class FJetpack extends JavaPlugin implements Listener {
             return true;
         }
 
-        if (args[0].equalsIgnoreCase("CheckUpdate")) {
+        if (args[0].equalsIgnoreCase(ListCommand.get(4))) {
             JetpackEvents.CekUpdate(sender);
             return true;
         }
 
-        if (args[0].equalsIgnoreCase("Set")) {
-            if (!sender.hasPermission("FJetpack.Set")) {
+        if (args[0].equalsIgnoreCase(ListCommand.get(0))) {
+            if (!sender.hasPermission(PERM_STRING + ListCommand.get(0))) {
                 sender.sendMessage(JetpackManager.PrefixPesan + JetpackManager.TidakAdaAkses);
                 return true;
             }
@@ -196,7 +175,7 @@ public class FJetpack extends JavaPlugin implements Listener {
                     p.getInventory().setItemInMainHand(item);
                 else
                     p.setItemInHand(item);
-                //p.getInventory().setItemInMainHand(item);
+
                 sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Success set item to jetpack " + args[1]);
                 return true;
             }
@@ -210,23 +189,21 @@ public class FJetpack extends JavaPlugin implements Listener {
     public ItemStack getItemStackJetpack(@NotNull CommandSender sender, ItemStack item, @NotNull ItemMeta im, @NotNull Jetpack jetpack) {
         im.setDisplayName(translateCodes(jetpack.getDisplayName()));
         List<String> newLore = new ArrayList<>();
-        for (String lore : jetpack.getLore()) {
+        for (String lore : jetpack.getLore())
             newLore.add(translateCodes(lore
                     .replace(JETPACK_FUEL_VAR, jetpack.getFuel().replace("_", " "))
                     .replace(JETPACK_FUEL_ITEM_VAR, String.valueOf(0))));
-        }
         im.setLore(newLore);
 
         String flags = jetpack.getFlags().toString().replace("[", STRING_EMPTY).replace("]", STRING_EMPTY);
-        if (!flags.equalsIgnoreCase("none")) {
-            for (String itemflag : jetpack.getFlags()) {
+        if (!flags.equalsIgnoreCase("none"))
+            for (String itemflag : jetpack.getFlags())
                 try {
                     im.addItemFlags(ItemFlag.valueOf(itemflag));
                 } catch (Exception ignored) {
                     sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "Invalid flag " + itemflag);
                 }
-            }
-        }
+
         if (nmsServerVersion.startsWith("v1_17_"))
             im.setUnbreakable(jetpack.isUnbreakable());
 
@@ -236,8 +213,8 @@ public class FJetpack extends JavaPlugin implements Listener {
         item = ItemMetaData.setItemMetaDataString(item, GET_JETPACK_FUEL, String.valueOf(0));
 
         String enchants = jetpack.getEnchantments().toString().replace("[", STRING_EMPTY).replace("]", STRING_EMPTY);
-        if (!enchants.equalsIgnoreCase("none")) {
-            for (String enchant : jetpack.getEnchantments()) {
+        if (!enchants.equalsIgnoreCase("none"))
+            for (String enchant : jetpack.getEnchantments())
                 try {
                     String enchantname = enchant.split(":")[0];
                     int enchantlvl = Integer.parseInt(enchant.split(":")[1]);
@@ -247,31 +224,27 @@ public class FJetpack extends JavaPlugin implements Listener {
                 } catch (Exception ignored) {
                     sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "Invalid enchant " + enchant);
                 }
-            }
-        }
-
-
         return item;
     }
 
-    public void AmbilJP(CommandSender sender, Player p, Jetpack jetpack) {
-        ItemStack item = new ItemStack(Material.valueOf(jetpack.getJetpackItem().toUpperCase()));
-        ItemMeta im = item.getItemMeta();
-
-        if (im == null) {
-            sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "Give item " + ChatColor.GOLD + jetpack.getName() + ChatColor.GREEN + " Jetpack Failed!");
-            return;
-        }
-        item = getItemStackJetpack(sender, item, im, jetpack);
-
-        p.getInventory().addItem(item);
-
-        if (sender.equals(p))
-            sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Give item " + ChatColor.GOLD + jetpack.getName() + ChatColor.GREEN + " Jetpack to your self success!");
-        else {
+    public void AmbilJP(CommandSender sender, Player p, @NotNull Jetpack jetpack) {
+        try {
+            ItemStack item = new ItemStack(Material.valueOf(jetpack.getJetpackItem().toUpperCase()));
+            ItemMeta im = item.getItemMeta();
+            if (im == null) {
+                sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "Give item " + ChatColor.GOLD + jetpack.getName() + ChatColor.GREEN + " Jetpack Failed!");
+                return;
+            }
+            item = getItemStackJetpack(sender, item, im, jetpack);
+            p.getInventory().addItem(item);
+            if (sender.equals(p)) {
+                sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Give item " + ChatColor.GOLD + jetpack.getName() + ChatColor.GREEN + " Jetpack to your self success!");
+                return;
+            }
             sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Give item " + ChatColor.GOLD + jetpack.getName() + ChatColor.GREEN + " Jetpack to player " + ChatColor.YELLOW + p.getDisplayName() + ChatColor.GREEN + " success!");
             p.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "You have been given a " + ChatColor.GOLD + jetpack.getName() + ChatColor.GREEN + " Jetpack from " + sender.getName());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
-
 }

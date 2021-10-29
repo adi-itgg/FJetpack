@@ -7,6 +7,7 @@
       <element id="module-output" name="FJetpack" />
       <element id="file-copy" path="$PROJECT_DIR$/messages.yml" />
       <element id="file-copy" path="$PROJECT_DIR$/jetpacks.yml" />
+      <element id="file-copy" path="$PROJECT_DIR$/help.txt" />
     </root>
   </artifact>
 </component>
