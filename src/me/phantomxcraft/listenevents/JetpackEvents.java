@@ -19,6 +19,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
@@ -115,8 +116,8 @@ public class JetpackEvents extends JetpackManager implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     private void onInventoryClick(final @NotNull InventoryClickEvent e) {
+        if (e instanceof InventoryCreativeEvent) return;
         Player p = (Player) e.getWhoClicked();
-
         try {
             ItemStack item = e.getCurrentItem();
             ItemStack cursorItem = e.getCursor();
@@ -150,13 +151,13 @@ public class JetpackEvents extends JetpackManager implements Listener {
             boolean isLeftClicked = e.getClick() == ClickType.LEFT;
             int fuelAdded = isLeftClicked ? cursorItem.getAmount() : 1;
 
-            int FuelValNow = getIntOnly(ItemMetaData.getItemMetaDataString(item, GET_JETPACK_FUEL));
+            int FuelValNow = getIntOnly(ItemMetaData.getItemMetaDataString(item, GET_JETPACK_FUEL), 0);
             String newFuelVal = String.valueOf(FuelValNow + fuelAdded);
-            item = updateLore(item, itemMeta, fuelItem, newFuelVal, jetpack);
+            item = updateLore(item, itemMeta, newFuelVal, jetpack);
             e.setCurrentItem(item);
             if (isLeftClicked)
                 p.setItemOnCursor(new ItemStack(Material.AIR));
-            else {
+             else {
                 cursorItem.setAmount(cursorItem.getAmount() - 1);
                 p.setItemOnCursor(cursorItem);
             }
@@ -217,8 +218,8 @@ public class JetpackEvents extends JetpackManager implements Listener {
                 if (fuelType != Material.AIR) {
                     // Cek bahan bakar
                     String displayFuel = jetpack.getFuel().replace("_", " ");
-                    fuelNow = getIntOnly(ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_FUEL));
-                    if (fuelNow < 1) {
+                    fuelNow = getIntOnly(ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_FUEL), 0);
+                    if (fuelNow < getIntOnly(jetpack.getFuelAmout(), 1)) {
                         pesan(p, TidakAdaBensin.replaceAll("%fuel_item%", displayFuel));
                         return;
                     }
@@ -237,8 +238,8 @@ public class JetpackEvents extends JetpackManager implements Listener {
 
                 String burnStatus = ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_IS_BURNING);
                 if (burnStatus.equals(String.valueOf(1))) {
-                    fuelNow--;
-                    eqc = updateLore(eqc, eqm, jetpack.getFuel(), String.valueOf(fuelNow), jetpack);
+                    fuelNow -= getIntOnly(jetpack.getFuelAmout(), 1);
+                    eqc = updateLore(eqc, eqm, String.valueOf(fuelNow), jetpack);
                 }
                 eqc = ItemMetaData.setItemMetaDataString(eqc, GET_JETPACK_IS_BURNING, String.valueOf(1));
                 eq.setArmorContents(updateItemsFJP(armors, eqc));
@@ -312,17 +313,14 @@ public class JetpackEvents extends JetpackManager implements Listener {
                                 return;
                             }
 
-
-                            String fuelItem = jetpack.getFuel();
-
-                            int FuelValNow = getIntOnly(ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_FUEL));
-                            if (FuelValNow < 1) {
+                            int FuelValNow = getIntOnly(ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_FUEL), 0);
+                            if (FuelValNow < getIntOnly(jetpack.getFuelAmout(), 1)) {
                                 pesan(p, BahanBakarHabis);
                                 cancel();
                                 return;
                             }
-                            String newFuelVal = String.valueOf(FuelValNow - getIntOnly(jetpack.getFuelAmout()));
-                            eqc = updateLore(eqc, eqm, fuelItem, newFuelVal, jetpack);
+                            String newFuelVal = String.valueOf(FuelValNow - getIntOnly(jetpack.getFuelAmout(), 1));
+                            eqc = updateLore(eqc, eqm, newFuelVal, jetpack);
                             if (p.getEquipment() == null || p.getEquipment().getArmorContents().length < 1) {
                                 PCopot(p);
                                 cancel();
@@ -357,11 +355,11 @@ public class JetpackEvents extends JetpackManager implements Listener {
         }.runTaskTimerAsynchronously(getPlugin(), Integer.parseInt(jetpack.getBurnRate()) * 20L, Integer.parseInt(jetpack.getBurnRate()) * 20L);
     }
 
-    private ItemStack updateLore(ItemStack eqc, ItemMeta eqm, String fuelItem, String newFuelVal, Jetpack jetpack) {
+    public static ItemStack updateLore(ItemStack eqc, ItemMeta eqm, String newFuelVal, Jetpack jetpack) {
         List<String> newLore = new ArrayList<>();
         for (String conflore : jetpack.getLore()) {
             conflore = translateCodes(conflore);
-            conflore = conflore.replace(JETPACK_FUEL_VAR, fuelItem.replace("_", " "))
+            conflore = conflore.replace(JETPACK_FUEL_VAR, jetpack.getFuel().replace("_", " "))
                     .replace(JETPACK_FUEL_ITEM_VAR, newFuelVal);
             newLore.add(conflore);
         }
@@ -470,9 +468,9 @@ public class JetpackEvents extends JetpackManager implements Listener {
         pesan(p, PrefixPesan + "§aPlease wait, Checking update...");
         try {
             new UpdateChecker(getPlugin(), 78318).getVersion(version -> {
-                if (getIntOnly(getPlugin().getDescription().getVersion()) == getIntOnly(version))
+                if (getIntOnly(getPlugin().getDescription().getVersion(), 1) == getIntOnly(version, 1))
                     pesan(p, PrefixPesan + "§aThere is not a new update available. You are using the latest version");
-                else if (getIntOnly(getPlugin().getDescription().getVersion()) >= getIntOnly(version))
+                else if (getIntOnly(getPlugin().getDescription().getVersion(), 1) >= getIntOnly(version, 1))
                     pesan(p, PrefixPesan + "§aThere is not a new update available. You are using the latest dev build version");else {
                     pesan(p, PrefixPesan + "§bThere is a new update available! v" + version);
                     pesan(p, PrefixPesan + "§bhttps://www.spigotmc.org/resources/fjetpack.78318/");

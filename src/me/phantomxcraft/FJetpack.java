@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import static me.phantomxcraft.TapTab.ListCommand;
+import static me.phantomxcraft.listenevents.JetpackEvents.updateLore;
 import static me.phantomxcraft.utils.Fungsi.*;
 
 public class FJetpack extends JavaPlugin implements Listener {
@@ -149,9 +150,13 @@ public class FJetpack extends JavaPlugin implements Listener {
                 sender.sendMessage(JetpackManager.PrefixPesan + JetpackManager.TidakAdaAkses);
                 return true;
             }
+            if (args.length == 1) {
+                sender.sendMessage(JetpackManager.PrefixPesan + translateCodes("&8&l- &3/fj Set [Jetpack]"));
+                return true;
+            }
             if (sender instanceof Player) {
                 Player p = (Player) sender;
-                ItemStack item = getIntOnly(nmsServerVersion.split(Pattern.quote("_"))[1]) > 8 ? p.getInventory().getItemInMainHand() : p.getItemInHand();
+                ItemStack item = getIntOnly(nmsServerVersion.split(Pattern.quote("_"))[1], 1) > 8 ? p.getInventory().getItemInMainHand() : p.getItemInHand();
                 ItemMeta im = item.getItemMeta();
                 if (item.getType() == Material.AIR || im == null) {
                     sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "You not holding any item in hand.");
@@ -171,7 +176,7 @@ public class FJetpack extends JavaPlugin implements Listener {
 
                 item = getItemStackJetpack(sender, item, im, jetpack);
 
-                if (getIntOnly(nmsServerVersion.split(Pattern.quote("_"))[1]) > 11)
+                if (getIntOnly(nmsServerVersion.split(Pattern.quote("_"))[1], 1) > 11)
                     p.getInventory().setItemInMainHand(item);
                 else
                     p.setItemInHand(item);
@@ -180,6 +185,51 @@ public class FJetpack extends JavaPlugin implements Listener {
                 return true;
             }
             sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "This command can run only in game as player!");
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase(ListCommand.get(5))) {
+            if (!sender.hasPermission(PERM_STRING + ListCommand.get(5))) {
+                sender.sendMessage(JetpackManager.PrefixPesan + JetpackManager.TidakAdaAkses);
+                return true;
+            }
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "This command can run only in game as player!");
+                return true;
+            }
+            if (args.length == 1 || getIntOnly(args[1], -1) == -1) {
+                sender.sendMessage(JetpackManager.PrefixPesan + translateCodes("&8&l- &3/fj SetFuel <Amount>"));
+                return true;
+            }
+            int setVal = getIntOnly(args[1], 0);
+            Player p = (Player) sender;
+            ItemStack item = getIntOnly(nmsServerVersion.split(Pattern.quote("_"))[1], 1) > 8 ? p.getInventory().getItemInMainHand() : p.getItemInHand();
+            ItemMeta im = item.getItemMeta();
+            if (item.getType() == Material.AIR || im == null) {
+                sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "You not holding any item in hand.");
+                return true;
+            }
+
+            if (!ItemMetaData.isItemArmor(item)) {
+                sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "This item is not armor item!");
+                return true;
+            }
+
+            String idJP = ItemMetaData.getItemMetaDataString(item, GET_JETPACK_NAME);
+            Jetpack jetpack = JetpackManager.jetpacksLoaded.get(idJP);
+            if (jetpack == null) {
+                sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "This item is not Jetpack item!");
+                return true;
+            }
+
+            item = updateLore(item, item.getItemMeta(), String.valueOf(setVal), jetpack);
+
+            if (getIntOnly(nmsServerVersion.split(Pattern.quote("_"))[1], 1) > 11)
+                p.getInventory().setItemInMainHand(item);
+            else
+                p.setItemInHand(item);
+
+            sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Success set fuel jetpack to " + setVal);
             return true;
         }
 
@@ -218,7 +268,7 @@ public class FJetpack extends JavaPlugin implements Listener {
                 try {
                     String enchantname = enchant.split(":")[0];
                     int enchantlvl = Integer.parseInt(enchant.split(":")[1]);
-                    Enchantment enchantment = getIntOnly(nmsServerVersion.split(Pattern.quote("_"))[1]) > 16 ? Enchantment.getByKey(NamespacedKey.minecraft(enchantname.toLowerCase())) : Enchantment.getByName(enchantname.toUpperCase());
+                    Enchantment enchantment = getIntOnly(nmsServerVersion.split(Pattern.quote("_"))[1], 1) > 16 ? Enchantment.getByKey(NamespacedKey.minecraft(enchantname.toLowerCase())) : Enchantment.getByName(enchantname.toUpperCase());
                     if (enchantment == null) continue;
                     item.addUnsafeEnchantment(enchantment, enchantlvl);
                 } catch (Exception ignored) {

@@ -30,12 +30,12 @@ public class Fungsi {
         return o == null ? STRING_EMPTY : o.toString();
     }
 
-    public static int getIntOnly(String s) {
+    public static int getIntOnly(String s, int defaultValue) {
         try {
-            if (s == null) return 0;
+            if (s == null) return defaultValue;
             return Integer.parseInt(s.replaceAll("\\D+", STRING_EMPTY));
         } catch (Exception e) {
-            return 0;
+            return defaultValue;
         }
     }
 

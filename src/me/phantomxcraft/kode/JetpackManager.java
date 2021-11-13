@@ -152,7 +152,7 @@ public class JetpackManager {
             String confVer = getConfig().getString("Version");
             if (!cf.exists() || confVer == null)
                 saveBawaanConfig();
-            else if (getIntOnly(confVer) < versiConfig) {
+            else if (getIntOnly(confVer, 1) < versiConfig) {
                 sender.sendMessage(PrefixPesan + ChatColor.YELLOW + "WARNING!: Config doesn't support!");
                 File dirOldver = new File(getDataFolder(), "configs-v" + getConfig().getString("Version") + "-backup");
                 if (dirOldver.mkdirs() && cf.exists() && cf.renameTo(new File(dirOldver, CONFIG_FILE)))
