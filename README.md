@@ -6,7 +6,7 @@ Simple a Jetpack Plugin - Fuel System - Multi Jetpack with customizable configur
 | Command | Description  |
 |  :---:  |     :-:      |
 | /fj or /fj Help | Show commands available |
-| /fj Get or /fj Give (Player) [Jetpack] <Fuel> | Get jetpack item |
+| /fj Get or /fj Give (Player) [Jetpack] <<Fuel>> | Get jetpack item |
 | /fj Set [Jetpack] <Fuel> | Set Jetpack in hand with fuel |
 | /fj SetFuel <Amount> | Set Amount Fuel Jetpack in hand |
 | /fj Reload | Reload all config |
