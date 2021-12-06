@@ -10,7 +10,8 @@ public class ItemMetaData {
 
     public static ItemStack setItemMetaDataString(ItemStack itemStack, String key, String value) {
         switch (FJetpack.nmsServerVersion) {
-            //case "v1_17_R1":
+//            case "v1_17_R1":
+//                return (new ItemMetaData_v1_17_R1()).setItemDataString(itemStack, key, value);
             case "v1_16_R3":
                 return (new ItemMetaData_v1_16_R3()).setItemDataString(itemStack, key, value);
             case "v1_16_R2":
@@ -42,14 +43,15 @@ public class ItemMetaData {
             case "v1_8_R1":
                 return (new ItemMetaData_v1_8_R1()).setItemDataString(itemStack, key, value);
             default:
-                return (new ItemMetaData_v1_17_R1()).setItemDataString(itemStack, key, value);
+                return (new ItemMetaData_v1_18_R1()).setItemDataString(itemStack, key, value);
         }
     }
 
     @Nonnull @NotNull
     public static String getItemMetaDataString(ItemStack itemStack, String key) {
         switch (FJetpack.nmsServerVersion) {
-            //case "v1_17_R1":
+//            case "v1_17_R1":
+//                return (new ItemMetaData_v1_17_R1()).getItemDataString(itemStack, key);
             case "v1_16_R3":
                 return (new ItemMetaData_v1_16_R3()).getItemDataString(itemStack, key);
             case "v1_16_R2":
@@ -81,12 +83,14 @@ public class ItemMetaData {
             case "v1_8_R1":
                 return (new ItemMetaData_v1_8_R1()).getItemDataString(itemStack, key);
             default:
-                return (new ItemMetaData_v1_17_R1()).getItemDataString(itemStack, key);
+                return (new ItemMetaData_v1_18_R1()).getItemDataString(itemStack, key);
         }
     }
 
     public static boolean isItemArmor(ItemStack itemStack) {
         switch (FJetpack.nmsServerVersion) {
+//            case "v1_17_R1":
+//                return (new ItemMetaData_v1_17_R1()).isItemArmor(itemStack);
             case "v1_16_R3":
                 return (new ItemMetaData_v1_16_R3()).isItemArmor(itemStack);
             case "v1_16_R2":
@@ -118,7 +122,7 @@ public class ItemMetaData {
             case "v1_8_R1":
                 return (new ItemMetaData_v1_8_R1()).isItemArmor(itemStack);
             default:
-                return (new ItemMetaData_v1_17_R1()).isItemArmor(itemStack);
+                return (new ItemMetaData_v1_18_R1()).isItemArmor(itemStack);
         }
     }
 

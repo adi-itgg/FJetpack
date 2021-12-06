@@ -137,7 +137,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
 
             Jetpack jetpack = JetpackManager.jetpacksLoaded.get(ItemMetaData.getItemMetaDataString(item, GET_JETPACK_NAME));
             if (jetpack == null) return;
-            if (!p.hasPermission(jetpack.getPermission())) {
+            if (!p.hasPermission(jetpack.getPermission()) && !p.hasPermission(jetpack.getPermission() + ".refuel")) {
                 pesan(p, TidakAdaAkses);
                 return;
             }
@@ -189,7 +189,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
                 if (jetpack == null) continue;
                 // new Method
                 // Cek Permis Player
-                if (!e.getPlayer().hasPermission(jetpack.getPermission())) {
+                if (!e.getPlayer().hasPermission(jetpack.getPermission()) && !e.getPlayer().hasPermission(jetpack.getPermission() + ".use")) {
                     pesan(p, TidakAdaAkses);
                     return;
                 }
@@ -292,7 +292,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
                         if (eqc == null || eqc.getType() == Material.AIR) continue;
                         String jpNameItem = ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_FUEL);
                         if (jpNameItem.equalsIgnoreCase(STRING_EMPTY)) continue;
-                        if (eqc.getItemMeta() == null || !p.hasPermission(jetpack.getPermission())) {
+                        if (eqc.getItemMeta() == null || (!p.hasPermission(jetpack.getPermission()) && !p.hasPermission(jetpack.getPermission() + ".use"))) {
                             PCopot(p);
                             cancel();
                             return;

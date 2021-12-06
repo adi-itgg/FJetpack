@@ -1,7 +1,7 @@
 name: FJetpack
 main: me.phantomxcraft.FJetpack
 description: Simple and Customizable a Jetpack Plugin
-version: 0.2.6
+version: 0.2.7
 api-version: 1.13
 author: PhantomXCraft
 softdepend: [CMI]

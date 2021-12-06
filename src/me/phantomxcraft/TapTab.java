@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.craftbukkit.libs.org.eclipse.sisu.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -52,10 +51,20 @@ public class TapTab implements TabCompleter {
             completions = JetpackList(completions, args[1], null);
 
         Collections.sort(completions);
+
+        if ((args[0].equalsIgnoreCase(ListCommand.get(0)) && args.length == 3) || ((args[0].equalsIgnoreCase(ListCommand.get(1)) || args[0].equalsIgnoreCase(ListCommand.get(2))) && args.length == 4)) {
+            List<String> defFuel = new ArrayList<>();
+            defFuel.add("32");
+            defFuel.add("64");
+            defFuel.add("128");
+            defFuel.add("256");
+            StringUtil.copyPartialMatches(args[args.length == 4 ? 3 : 2], defFuel, completions);
+        }
+
         return completions;
     }
 
-    private @NotNull List<String> JetpackList(@NotNull List<String> completions, @NotNull String token, @Nullable List<String> cmdSuggestions) {
+    private @NotNull List<String> JetpackList(@NotNull List<String> completions, @NotNull String token, List<String> cmdSuggestions) {
         if (cmdSuggestions == null) cmdSuggestions = new ArrayList<>();
         cmdSuggestions.addAll(JetpackManager.jetpacksLoaded.keySet());
         return StringUtil.copyPartialMatches(token, cmdSuggestions, completions);
