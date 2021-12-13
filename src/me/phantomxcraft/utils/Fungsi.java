@@ -1,10 +1,6 @@
 package me.phantomxcraft.utils;
 
 import org.bukkit.ChatColor;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 public class Fungsi {
 
@@ -12,6 +8,7 @@ public class Fungsi {
     public static final String GET_JETPACK_NAME = "FJetpack";
     public static final String GET_JETPACK_FUEL = "FJFuel";
     public static final String GET_JETPACK_IS_BURNING = "FJBurning";
+    public static final String GET_CUSTOM_FUEL_ID = "FJCustomFuel";
 
     public static final String JETPACK_FUEL_VAR = "{#fuel}";
     public static final String JETPACK_FUEL_ITEM_VAR = "{#fuel_value}";
@@ -21,6 +18,7 @@ public class Fungsi {
     public static final String CONFIG_FILE = "config.yml";
     public static final String MESSAGES_FILE = "messages.yml";
     public static final String JETPACKS_FILE = "jetpacks.yml";
+    public static final String CUSTOM_FUELS_FILE = "CustomFuels.yml";
 
     public static final String PERM_STRING = "fjetpack.";
 
@@ -40,7 +38,7 @@ public class Fungsi {
     }
 
     public static String translateCodes(String s) {
-        return ChatColor.translateAlternateColorCodes('&', s);
+        return ChatColor.translateAlternateColorCodes(AND_SYMBOL, s);
     }
 
 }

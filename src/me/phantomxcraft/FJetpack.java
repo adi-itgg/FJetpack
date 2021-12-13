@@ -1,10 +1,12 @@
 package me.phantomxcraft;
 
 
-import me.phantomxcraft.jetpack.Jetpack;
+import me.phantomxcraft.abstrak.CustomFuel;
+import me.phantomxcraft.abstrak.Jetpack;
 import me.phantomxcraft.kode.JetpackManager;
 import me.phantomxcraft.listenevents.JetpackEvents;
 import me.phantomxcraft.nms.ItemMetaData;
+import me.phantomxcraft.utils.Fungsi;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -13,6 +15,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -22,6 +25,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,6 +35,8 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import static me.phantomxcraft.TapTab.ListCommand;
+import static me.phantomxcraft.kode.JetpackManager.customFuelsLoaded;
+import static me.phantomxcraft.kode.JetpackManager.jetpacksLoaded;
 import static me.phantomxcraft.listenevents.JetpackEvents.updateLore;
 import static me.phantomxcraft.utils.Fungsi.*;
 
@@ -43,7 +49,7 @@ public class FJetpack extends JavaPlugin implements Listener {
 
         try {
             nmsServerVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-            consoleCommandSender.sendMessage(ChatColor.GOLD + "Detected Server: " + ChatColor.GREEN + Bukkit.getName() + " " + Bukkit.getVersion() + " - " + nmsServerVersion);
+            consoleCommandSender.sendMessage(ChatColor.GOLD + "Detected Server: " + ChatColor.GREEN + Bukkit.getName() + " " + Bukkit.getVersion());
         } catch (ArrayIndexOutOfBoundsException whatVersionAreYouUsingException) {
             whatVersionAreYouUsingException.printStackTrace();
             consoleCommandSender.sendMessage(ChatColor.RED + "Unknown Server: " + ChatColor.GREEN + Bukkit.getName() + " " + Bukkit.getVersion());
@@ -67,7 +73,7 @@ public class FJetpack extends JavaPlugin implements Listener {
             Player p = iter.next();
             p.sendMessage(JetpackManager.PrefixPesan + "§cThis plugin has been unloaded!");
             JetpackEvents.HapusTasks(p);
-            if (p.isOnline() && JetpackEvents.DelPFlyUnlod(p)) iter.remove();
+            if (p.isOnline() && JetpackEvents.DelPFlyUnlod(p, false)) iter.remove();
         }
         JetpackManager.jetpacksLoaded.clear();
     }
@@ -94,6 +100,11 @@ public class FJetpack extends JavaPlugin implements Listener {
                 while(s.hasNextLine())
                     sender.sendMessage(String.format(translateCodes(s.nextLine()), this.getDescription().getVersion()));
                 s.close();
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } else
                 sender.sendMessage(JetpackManager.PrefixPesan + JetpackManager.TidakAdaAkses);
             return true;
@@ -111,28 +122,36 @@ public class FJetpack extends JavaPlugin implements Listener {
         if (args[0].equalsIgnoreCase(ListCommand.get(1)) || args[0].equalsIgnoreCase(ListCommand.get(2))) {
             if (sender.hasPermission(PERM_STRING + ListCommand.get(1)) || sender.hasPermission(PERM_STRING + ListCommand.get(2))) {
 
-                if (args.length == 2) {
-                    if (!(sender instanceof Player)) {
-                        sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "You can't run this command from Console!");
-                        return true;
-                    }
-                    Jetpack jetpack = JetpackManager.jetpacksLoaded.get(args[1]);
-                    if (jetpack != null) {
-                        AmbilJP(sender, (Player) sender, jetpack, 0);
-                        return true;
-                    }
-
-                }
-                if (args.length == 3 || args.length == 4) {
-                    Jetpack jetpack = JetpackManager.jetpacksLoaded.get(args[2]);
-                    if (jetpack != null) {
-                        try {
-                            AmbilJP(sender, Bukkit.getPlayerExact(args[1]), jetpack, args.length == 4 ? Integer.parseInt(args[3]) : 0);
+                try {
+                    if (args.length == 2 || args.length == 3) {
+                        Jetpack jp = jetpacksLoaded.get(args[1]);
+                        if (args.length == 2 && jp == null)
+                            throw new InvalidConfigurationException(String.valueOf(true));
+                        if (!(sender instanceof Player)) {
+                            sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "You can't run this command from Console!");
                             return true;
-                        } catch (NumberFormatException ex) {
-                            sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "Invalid fuel amount " + args[3]);
+                        }
+                        if (jp == null)
+                            jp = jetpacksLoaded.get(args[2]);
+                        if (jp != null) {
+                            AmbilJP(sender, (Player) sender, jp, args.length == 3 ? getIntOnly(args[2], 0) : 0);
+                            return true;
                         }
                     }
+
+                    if (args.length == 4) {
+                        Jetpack jetpack = JetpackManager.jetpacksLoaded.get(args[2]);
+                        if (jetpack != null) {
+                            try {
+                                AmbilJP(sender, Bukkit.getPlayerExact(args[1]), jetpack, Integer.parseInt(args[3]));
+                                return true;
+                            } catch (NumberFormatException ex) {
+                                sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "Invalid fuel amount " + args[3]);
+                                return true;
+                            }
+                        }
+                    }
+                } catch (Exception ignored) {
                 }
 
                 StringBuilder sB = new StringBuilder();
@@ -180,7 +199,7 @@ public class FJetpack extends JavaPlugin implements Listener {
                 }
 
                 try {
-                    item = getItemStackJetpack(sender, item, im, jetpack, args.length == 3 ? Integer.parseInt(args[2]) : 0);
+                    item = getItemStackJetpack(sender, item, im, jetpack, args.length == 3 ? getIntOnly(args[2], 0) : 0);
                 } catch (NumberFormatException ex) {
                     sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "Invalid fuel amount!");
                     return true;
@@ -191,7 +210,7 @@ public class FJetpack extends JavaPlugin implements Listener {
                 else
                     p.setItemInHand(item);
 
-                sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Success set item to jetpack " + args[1]);
+                sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Success set item to jetpack " + args[1] + translateCodes(" with fuel amount &6&lx") + (args.length == 3 ? getIntOnly(args[2], 0) : 0));
                 return true;
             }
             sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "This command can run only in game as player!");
@@ -243,20 +262,106 @@ public class FJetpack extends JavaPlugin implements Listener {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase(ListCommand.get(6)) || args[0].equalsIgnoreCase(ListCommand.get(7))) {
+            if (!sender.hasPermission(PERM_STRING + ListCommand.get(6)) && !sender.hasPermission(PERM_STRING + ListCommand.get(7))) {
+                sender.sendMessage(JetpackManager.PrefixPesan + JetpackManager.TidakAdaAkses);
+                return true;
+            }
+            try {
+                if (args.length == 2 || args.length == 3) {
+                    CustomFuel cf = customFuelsLoaded.get(args[1]);
+                    if (args.length == 2 && cf == null)
+                        throw new InvalidConfigurationException(String.valueOf(true));
+                    if (!(sender instanceof Player)) {
+                        sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "You can't run this command from Console!");
+                        return true;
+                    }
+                    if (cf == null)
+                        cf = customFuelsLoaded.get(args[2]);
+                    if (cf != null) {
+                        giveCustomFuel(sender, (Player) sender, cf, args.length == 3 ? getIntOnly(args[2], 1) : 1);
+                        return true;
+                    }
+                }
+
+                if (args.length == 4) {
+                    CustomFuel cf = customFuelsLoaded.get(args[2]);
+                    if (cf != null) {
+                        try {
+                            giveCustomFuel(sender, Bukkit.getPlayerExact(args[1]), cf, Integer.parseInt(args[3]));
+                            return true;
+                        } catch (NumberFormatException ex) {
+                            sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "Invalid fuel amount " + args[3]);
+                            return true;
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+
+            sender.sendMessage(JetpackManager.PrefixPesan + translateCodes("&8&l- &3/fj GetFuel <CustomFuel>"));
+            return true;
+        }
+
         return false;
     }
 
+    public void giveCustomFuel(@NotNull CommandSender sender, Player p, @NotNull CustomFuel customFuel, int amount) {
+        Material material;
+        try {
+            material = Material.valueOf(customFuel.getItem().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "Failed to get Custom Fuel " + customFuel.getID() + " Invalid item material name: " + customFuel.getItem());
+            return;
+        }
+        ItemStack item = new ItemStack(material);
+        if (customFuel.isGlowing()) item = ItemMetaData.setItemMetaDataString(item, "ench", null);
+        ItemMeta im = item.getItemMeta();
+        if (im == null) {
+            sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "Failed to get Custom Fuel " + customFuel.getID());
+            return;
+        }
+        im.setDisplayName(translateCodes(customFuel.getDisplayName()));
+        customFuel.getLore().replaceAll(Fungsi::translateCodes);
+        im.setLore(customFuel.getLore());
+
+        if (customFuel.isGlowing()) {
+            im.addEnchant(Enchantment.LUCK, 1, false);
+            im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        }
+        item.setItemMeta(im);
+
+        item = ItemMetaData.setItemMetaDataString(item, GET_CUSTOM_FUEL_ID, "@" + customFuel.getID());
+        item.setAmount(amount);
+        p.getInventory().addItem(item);
+        p.updateInventory();
+        if (sender.equals(p)) {
+            sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Give item " + ChatColor.GOLD + customFuel.getID() + ChatColor.GREEN + translateCodes(String.format(" item &6x%s&r &ato your self success!", amount)));
+            return;
+        }
+        sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Give item " + ChatColor.GOLD + customFuel.getID() + ChatColor.GREEN + translateCodes(String.format(" item &6x%s&r &ato player ", amount)) + ChatColor.YELLOW + p.getDisplayName() + ChatColor.GREEN + " success!");
+        p.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "You have been given a " + ChatColor.GOLD + customFuel.getID() + ChatColor.GREEN + " item from " + sender.getName());
+    }
+
     public ItemStack getItemStackJetpack(@NotNull CommandSender sender, ItemStack item, @NotNull ItemMeta im, @NotNull Jetpack jetpack, int fuel) {
+        String fd = jetpack.getFuel();
+        if (jetpack.getFuel().startsWith("@")) {
+            CustomFuel customFuel = customFuelsLoaded.get(jetpack.getFuel().substring(1));
+            if (customFuel == null) {
+                fd += " " + ChatColor.RED + "Invalid";
+                sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "No Custom Fuel with ID: " + jetpack.getFuel().substring(1));
+            } else
+                fd = translateCodes(customFuel.getCustomDisplay().length() < 1 ? customFuel.getDisplayName() : customFuel.getCustomDisplay());
+        } else
+            fd = fd.replace("_", " ");
         im.setDisplayName(translateCodes(jetpack.getDisplayName()));
         List<String> newLore = new ArrayList<>();
         for (String lore : jetpack.getLore())
             newLore.add(translateCodes(lore
-                    .replace(JETPACK_FUEL_VAR, jetpack.getFuel().replace("_", " "))
-                    .replace(JETPACK_FUEL_ITEM_VAR, fuel == -1 ? jetpack.getFuelAmout() : String.valueOf(fuel))));
+                    .replace(JETPACK_FUEL_VAR, fd)
+                    .replace(JETPACK_FUEL_ITEM_VAR, String.valueOf(fuel == -1 ? jetpack.getFuelAmout() : fuel))));
         im.setLore(newLore);
 
-        String flags = jetpack.getFlags().toString().replace("[", STRING_EMPTY).replace("]", STRING_EMPTY);
-        if (!flags.equalsIgnoreCase("none"))
+        if (jetpack.getFlags().size() != 0)
             for (String itemflag : jetpack.getFlags())
                 try {
                     im.addItemFlags(ItemFlag.valueOf(itemflag));
@@ -264,7 +369,7 @@ public class FJetpack extends JavaPlugin implements Listener {
                     sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "Invalid flag " + itemflag);
                 }
 
-        if (nmsServerVersion.startsWith("v1_17_"))
+        if (nmsServerVersion.startsWith("v1_17_") || nmsServerVersion.startsWith("v1_18_"))
             im.setUnbreakable(jetpack.isUnbreakable());
 
         item.setItemMeta(im);
@@ -272,19 +377,22 @@ public class FJetpack extends JavaPlugin implements Listener {
         item = ItemMetaData.setItemMetaDataString(item, GET_JETPACK_NAME, jetpack.getName());
         item = ItemMetaData.setItemMetaDataString(item, GET_JETPACK_FUEL, String.valueOf(0));
 
-        String enchants = jetpack.getEnchantments().toString().replace("[", STRING_EMPTY).replace("]", STRING_EMPTY);
-        if (!enchants.equalsIgnoreCase("none"))
-            for (String enchant : jetpack.getEnchantments())
+        enchantItem(sender, item, jetpack.getEnchantments());
+        return ItemMetaData.setItemMetaDataString(item, GET_JETPACK_FUEL, String.valueOf(fuel == -1 ? jetpack.getFuelAmout() : fuel));
+    }
+
+    public static void enchantItem(@NotNull CommandSender sender, ItemStack item, List<String> enchantments) {
+        if (enchantments.size() != 0)
+            for (String enchant : enchantments)
                 try {
                     String enchantname = enchant.split(":")[0];
-                    int enchantlvl = Integer.parseInt(enchant.split(":")[1]);
+                    int enchantlvl = getIntOnly(enchant.split(":")[1], 1);
                     Enchantment enchantment = getIntOnly(nmsServerVersion.split(Pattern.quote("_"))[1], 1) > 16 ? Enchantment.getByKey(NamespacedKey.minecraft(enchantname.toLowerCase())) : Enchantment.getByName(enchantname.toUpperCase());
                     if (enchantment == null) continue;
                     item.addUnsafeEnchantment(enchantment, enchantlvl);
                 } catch (Exception ignored) {
                     sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + "Invalid enchant " + enchant);
                 }
-        return ItemMetaData.setItemMetaDataString(item, GET_JETPACK_FUEL, fuel == -1 ? jetpack.getFuelAmout() : String.valueOf(fuel));
     }
 
     public void AmbilJP(@NotNull CommandSender sender, Player p, @NotNull Jetpack jetpack, int fuel) {
@@ -297,12 +405,13 @@ public class FJetpack extends JavaPlugin implements Listener {
             }
             item = getItemStackJetpack(sender, item, im, jetpack, fuel);
             p.getInventory().addItem(item);
+            p.updateInventory();
             if (sender.equals(p)) {
-                sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Give item " + ChatColor.GOLD + jetpack.getName() + ChatColor.GREEN + " Jetpack to your self success!");
+                sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Give item " + ChatColor.GOLD + jetpack.getName() + ChatColor.GREEN + translateCodes(String.format(" Jetpack with fuel &6&lx%s&r &ato your self success!", fuel)));
                 return;
             }
-            sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Give item " + ChatColor.GOLD + jetpack.getName() + ChatColor.GREEN + " Jetpack to player " + ChatColor.YELLOW + p.getDisplayName() + ChatColor.GREEN + " success!");
-            p.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "You have been given a " + ChatColor.GOLD + jetpack.getName() + ChatColor.GREEN + " Jetpack from " + sender.getName());
+            sender.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "Give item " + ChatColor.GOLD + jetpack.getName() + ChatColor.GREEN + translateCodes(String.format(" Jetpack with fuel &6&lx%s&r &ato player ", fuel)) + ChatColor.YELLOW + p.getDisplayName() + ChatColor.GREEN + " success!");
+            p.sendMessage(JetpackManager.PrefixPesan + ChatColor.GREEN + "You have been given a " + ChatColor.GOLD + jetpack.getName() + ChatColor.GREEN + translateCodes(String.format(" Jetpack with fuel &6&lx%s&r &afrom ", fuel)) + sender.getName());
         } catch (Exception e) {
             e.printStackTrace();
         }

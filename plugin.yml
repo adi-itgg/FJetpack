@@ -1,7 +1,7 @@
 name: FJetpack
 main: me.phantomxcraft.FJetpack
-description: Simple and Customizable a Jetpack Plugin
-version: 0.2.7
+description: Simple, Lightweight and Customizable a Jetpack Plugin
+version: 0.2.8
 api-version: 1.13
 author: PhantomXCraft
 softdepend: [CMI]
@@ -17,12 +17,21 @@ permissions:
       fjetpack.help: true
       fjetpack.reload: true
       fjetpack.get: true
+      fjetpack.give: true
+      fjetpack.getfuel: true
+      fjetpack.givefuel: true
       fjetpack.checkupdate: true
   fjetpack.help:
     default: true
   fjetpack.reload:
     default: false
   fjetpack.get:
+    default: false
+  fjetpack.give:
+    default: false
+  fjetpack.getfuel:
+    default: false
+  fjetpack.givefuel:
     default: false
   fjetpack.checkupdate:
     default: false

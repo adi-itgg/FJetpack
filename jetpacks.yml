@@ -19,8 +19,17 @@ Jetpacks:
     JetpackItem: CHAINMAIL_CHESTPLATE
     # Unbreakable item?
     Unbreakable: true
+    # 'Remove' - Remove Jetpack on Fuel is empty
+    # 'Drop' - Drop Jetpack on Fuel is empty
+    # 'None' - nothing to do
+    OnEmptyFuel: None
+    # 'Remove' - Remove Jetpack on Player death
+    # 'Drop' - Drop Jetpack on Player death
+    # 'None' - nothing to do
+    OnDeath: None
+    # For CustomFuels.yml using ID with prefix @
     # Fuel Item Material
-    Fuel: Dirt
+    Fuel: "@CVIP"
     # Fuel Cost
     FuelCost: 1
     # Fuel Burn Rate in seconds
@@ -56,19 +65,23 @@ Jetpacks:
       - '&3&m&l----===[&b &lUSAGE &3&m&l]===----'
       - '&9Sneak to toggle on/off'
       - '&9Double jump to fly'
+      - ''
+      - '&7Fuel: &a{#fuel_value} &b{#fuel}'
     Permission: fjetpack.member
     JetpackItem: LEATHER_CHESTPLATE
     Unbreakable: false
+    OnEmptyFuel: none
+    OnDeath: none
     Fuel: Coal
     FuelCost: 1
     BurnRate: 5
     Speed: 1.0
-    ParticleEffect: 'none'
+    ParticleEffect: none
     ParticleAmount: 0
     ParticleDelay: 2
     Flags:
       - HIDE_ATTRIBUTES
       - HIDE_ENCHANTS
-    Enchantments: 'none'
+    Enchantments: none
     WorldBlackList:
       - world1

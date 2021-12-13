@@ -1,6 +1,5 @@
 package me.phantomxcraft;
 
-import me.phantomxcraft.jetpack.Jetpack;
 import me.phantomxcraft.kode.JetpackManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -15,10 +14,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static me.phantomxcraft.utils.Fungsi.PERM_STRING;
+import static me.phantomxcraft.utils.Fungsi.*;
 
 public class TapTab implements TabCompleter {
-    public static final List<String> ListCommand = new ArrayList<>(Arrays.asList("Set", "Get", "Give", "Reload", "CheckUpdate", "SetFuel"));
+    public static final List<String> ListCommand = new ArrayList<>(Arrays.asList("Set", "Get", "Give", "Reload", "CheckUpdate", "SetFuel", "GetFuel", "GiveFuel"));
 
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!sender.isOp() || !sender.hasPermission(PERM_STRING + "admin") || !sender.hasPermission(PERM_STRING + args[0]))
@@ -40,19 +39,36 @@ public class TapTab implements TabCompleter {
                 completions = JetpackList(completions, args[1], cmds);
             }
 
-            if (args.length == 3) {
-                Jetpack jetpack = JetpackManager.jetpacksLoaded.get(args[1]);
-                if (jetpack == null)
-                    completions = JetpackList(completions, args[2], null);
-            }
+            if (args.length == 3 && JetpackManager.jetpacksLoaded.get(args[1]) == null)
+                completions = JetpackList(completions, args[2], null);
         }
 
         if (args[0].equalsIgnoreCase(ListCommand.get(0)) && args.length == 2)
             completions = JetpackList(completions, args[1], null);
 
+        if (args[0].equalsIgnoreCase(ListCommand.get(6)) || args[0].equalsIgnoreCase(ListCommand.get(7))) {
+            if (args.length == 2) {
+                List<String> cmds = new ArrayList<>(JetpackManager.customFuelsLoaded.keySet());
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    cmds.add(player.getName());
+                    String displayName = player.getDisplayName();
+                    if (!displayName.equalsIgnoreCase(player.getName()) && displayName.length() < 1)
+                        cmds.add(displayName);
+                }
+                StringUtil.copyPartialMatches(args[1], cmds, completions);
+            }
+
+            if (args.length == 3 && JetpackManager.customFuelsLoaded.get(args[1]) == null)
+                StringUtil.copyPartialMatches(args[2], new ArrayList<>(JetpackManager.customFuelsLoaded.keySet()), completions);
+
+        }
+
         Collections.sort(completions);
 
-        if ((args[0].equalsIgnoreCase(ListCommand.get(0)) && args.length == 3) || ((args[0].equalsIgnoreCase(ListCommand.get(1)) || args[0].equalsIgnoreCase(ListCommand.get(2))) && args.length == 4)) {
+        if ((args[0].equalsIgnoreCase(ListCommand.get(0)) && args.length == 3) ||
+                ((((args.length == 3 && JetpackManager.jetpacksLoaded.get(args[1]) != null ) || (args.length == 4 && JetpackManager.jetpacksLoaded.get(args[2]) != null)) && (args[0].equalsIgnoreCase(ListCommand.get(1)) || args[0].equalsIgnoreCase(ListCommand.get(2))) ||
+                        ((args[0].equalsIgnoreCase(ListCommand.get(6)) || args[0].equalsIgnoreCase(ListCommand.get(7))) &&
+                                (((args.length == 3 || args.length == 4) && JetpackManager.customFuelsLoaded.get(args[args.length == 4 ? 2 : 1]) != null)))))) {
             List<String> defFuel = new ArrayList<>();
             defFuel.add("32");
             defFuel.add("64");

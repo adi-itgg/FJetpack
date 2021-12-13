@@ -1,13 +1,14 @@
-package me.phantomxcraft.jetpack;
+package me.phantomxcraft.abstrak;
 
 import java.util.List;
 
 public class Jetpack {
-    private final String Permission, Fuel, FuelAmout, DisplayName, Name, Speed, JetpackItem, ParticleEffect, ParticleAmount, BurnRate, ParticleDelay;
+    private final String Permission, Fuel, DisplayName, Name, Speed, JetpackItem, ParticleEffect, ParticleDelay, OnEmptyFuel, OnDeath;
+    private final int FuelAmout, ParticleAmount, BurnRate;
     private final List<String> Lore, Flags, Enchantments, WorldBlacklist;
     private final boolean Unbreakable;
 
-    public Jetpack(String permission, String fuel, String fuelAmout, String displayName, String name, String speed, String jetpackItem, String particleEffect, String particleAmount, String burnRate, String particleDelay, List<String> lore, List<String> flags, List<String> enchantments, List<String> worldBlacklist, boolean unbreakable) {
+    public Jetpack(String permission, String fuel, int fuelAmout, String displayName, String name, String speed, String jetpackItem, String particleEffect, int particleAmount, int burnRate, String particleDelay, List<String> lore, List<String> flags, List<String> enchantments, List<String> worldBlacklist, boolean unbreakable, String onEmptyFuel, String onDeath) {
         Permission = permission;
         Fuel = fuel;
         FuelAmout = fuelAmout;
@@ -24,6 +25,8 @@ public class Jetpack {
         Enchantments = enchantments;
         WorldBlacklist = worldBlacklist;
         Unbreakable = unbreakable;
+        OnEmptyFuel = onEmptyFuel;
+        OnDeath = onDeath;
     }
 
     public String getPermission() {
@@ -34,7 +37,7 @@ public class Jetpack {
         return Fuel;
     }
 
-    public String getFuelAmout() {
+    public int getFuelAmout() {
         return FuelAmout;
     }
 
@@ -58,11 +61,11 @@ public class Jetpack {
         return ParticleEffect;
     }
 
-    public String getParticleAmount() {
+    public int getParticleAmount() {
         return ParticleAmount;
     }
 
-    public String getBurnRate() {
+    public int getBurnRate() {
         return BurnRate;
     }
 
@@ -88,5 +91,13 @@ public class Jetpack {
 
     public boolean isUnbreakable() {
         return Unbreakable;
+    }
+
+    public String getOnEmptyFuel() {
+        return OnEmptyFuel;
+    }
+
+    public String getOnDeath() {
+        return OnDeath;
     }
 }

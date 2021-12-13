@@ -1,0 +1,15 @@
+CustomFuels:
+  #ID For fuel
+  CVIP:
+    # Custom display name the fuel, leave empty will using DisplayName
+    CustomDisplay: "&6&lPertamax"
+    DisplayName: '&b&lC&6&lVIP'
+    Lore:
+      - ''
+      - '&eFuel for &l&6VIP!'
+      - ''
+      - '&6&lPremium &efuel'
+    Item: GOLD_INGOT
+    # Permission to use this fuel
+    Permission: fjetpack.fuel.cvip
+    Glowing: true

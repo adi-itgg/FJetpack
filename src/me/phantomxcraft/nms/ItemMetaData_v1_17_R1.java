@@ -1,12 +1,22 @@
 package me.phantomxcraft.nms;
 
-public class ItemMetaData_v1_17_R1 {
-
+//import net.minecraft.nbt.NBTTagCompound;
+//import net.minecraft.world.item.ItemArmor;
+//import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
+//import org.bukkit.inventory.ItemStack;
+//
+//import static me.phantomxcraft.utils.Fungsi.STRING_EMPTY;
+//
+//public class ItemMetaData_v1_17_R1 {
+//
 //    public ItemStack setItemDataString(ItemStack itemStack, String key, String value) {
 //        net.minecraft.world.item.ItemStack item = CraftItemStack.asNMSCopy(itemStack);
 //        NBTTagCompound nbtTagCompound = item.getTag();
 //        if (nbtTagCompound == null) nbtTagCompound = new NBTTagCompound();
-//        nbtTagCompound.setString(key, value);
+//        if (value == null)
+//            nbtTagCompound.remove(key);
+//        else
+//            nbtTagCompound.setString(key, value);
 //        return CraftItemStack.asBukkitCopy(item);
 //    }
 //
@@ -21,5 +31,5 @@ public class ItemMetaData_v1_17_R1 {
 //    public boolean isItemArmor(ItemStack itemStack) {
 //        return CraftItemStack.asNMSCopy(itemStack).getItem() instanceof ItemArmor;
 //    }
-
-}
+//
+//}

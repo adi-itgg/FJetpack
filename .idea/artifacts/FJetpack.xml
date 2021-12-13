@@ -8,6 +8,7 @@
       <element id="file-copy" path="$PROJECT_DIR$/messages.yml" />
       <element id="file-copy" path="$PROJECT_DIR$/jetpacks.yml" />
       <element id="file-copy" path="$PROJECT_DIR$/help.txt" />
+      <element id="file-copy" path="$PROJECT_DIR$/CustomFuels.yml" />
     </root>
   </artifact>
 </component>

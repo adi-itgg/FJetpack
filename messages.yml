@@ -7,3 +7,7 @@ Messages:
   WorldBlocked: "&cYou can't use Jetpack in this World!"
   JetpackRemoved: "&cYou take off your Jetpack, making you fall to the ground"
   NoFuel: "&cYou are out of fuel!"
+  OnEmptyFuelDropped: "&cJetpack out of fuel has been dropped!"
+  OnEmptyFuelRemoved: "&cJetpack out of fuel has been removed!"
+  OnDeathDropped: "&cYou died jetpack has been dropped!"
+  OnDeathRemoved: "&cYou died jetpack has been removed!"

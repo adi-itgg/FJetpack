@@ -13,7 +13,10 @@ public class ItemMetaData_v1_18_R1 {
         net.minecraft.world.item.ItemStack item = CraftItemStack.asNMSCopy(itemStack);
         NBTTagCompound nbtTagCompound = item.s();
         if (nbtTagCompound == null) nbtTagCompound = new NBTTagCompound();
-        nbtTagCompound.a(key, value);
+        if (value == null)
+            nbtTagCompound.r(key);
+        else
+            nbtTagCompound.a(key, value);
         return CraftItemStack.asBukkitCopy(item);
     }
 

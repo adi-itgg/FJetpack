@@ -3,6 +3,7 @@
 &bAll Command List
 &8
 &8&l- &3/FJ [Get|Give] (Player) [Jetpack] <Fuel> &r- &bGet/Give a Jetpack
+&8&l- &3/FJ [GetFuel|GiveFuel] (Player) [CustomFuel] <Amount> &r- &bGet/Give a Custom Fuel
 &8&l- &3/FJ Set [Jetpack] <Fuel> &r- &bSet Jetpack in hand
 &8&l- &3/FJ SetFuel <Amount> &r- &bSet Fuel Amount Jetpack in hand
 &8&l- &3/FJ Reload &r- &bReload Config Plugin
