@@ -1,6 +1,10 @@
 package me.phantomxcraft.utils;
 
+import me.phantomxcraft.FJetpack;
 import org.bukkit.ChatColor;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Fungsi {
 
@@ -37,8 +41,29 @@ public class Fungsi {
         }
     }
 
+    public static String hex(String message) {
+        if(FJetpack.serverVersion >= 16) {
+            Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
+            Matcher matcher = pattern.matcher(message);
+            while (matcher.find()) {
+                String hexCode = message.substring(matcher.start(), matcher.end());
+                String rs = hexCode.replace('#', 'x');
+
+                char[] ch = rs.toCharArray();
+                StringBuilder builder = new StringBuilder("");
+                for (char c : ch) {
+                    builder.append(AND_SYMBOL).append(c);
+                }
+
+                message = message.replace(hexCode, builder.toString());
+                matcher = pattern.matcher(message);
+            }
+        }
+        return message;
+    }
+
     public static String translateCodes(String s) {
-        return ChatColor.translateAlternateColorCodes(AND_SYMBOL, s);
+        return ChatColor.translateAlternateColorCodes(AND_SYMBOL, hex(s));
     }
 
 }

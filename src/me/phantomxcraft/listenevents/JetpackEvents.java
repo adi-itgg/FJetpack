@@ -213,7 +213,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
     private void onDamagedPlayerArmor(EntityDamageEvent e) {
         try {
             Entity entity = e.getEntity();
-            if (nmsServerVersion.startsWith("v1_17_") || nmsServerVersion.startsWith("v1_18_") || !(entity instanceof Player))
+            if (!(entity instanceof Player))
                 return;
             Player p = (Player) entity;
 
@@ -225,7 +225,14 @@ public class JetpackEvents extends JetpackManager implements Listener {
                 if (eqc == null || eqc.getType() == Material.AIR) continue;
                 Jetpack jetpack = JetpackManager.jetpacksLoaded.get(ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_NAME));
                 if (jetpack == null) continue;
-                eqc.setDurability((short) 0);
+                if (nmsServerVersion.startsWith("v1_17_") || nmsServerVersion.startsWith("v1_18_")) {
+                    ItemMeta im = eqc.getItemMeta();
+                    if (im != null) {
+                        im.setUnbreakable(jetpack.isUnbreakable());
+                        eqc.setItemMeta(im);
+                    }
+                } else if (jetpack.isUnbreakable())
+                    eqc.setDurability((short) 0);
                 eq.setArmorContents(updateItemsFJP(armors, eqc));
             }
 

@@ -43,12 +43,14 @@ import static me.phantomxcraft.utils.Fungsi.*;
 public class FJetpack extends JavaPlugin implements Listener {
 
     public static String nmsServerVersion = "UNKNOWN";
+    public static int serverVersion = 1;
 
     public void onEnable() {
         ConsoleCommandSender consoleCommandSender = getServer().getConsoleSender();
 
         try {
             nmsServerVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+            serverVersion = Integer.parseInt(nmsServerVersion.split("_")[1]);
             consoleCommandSender.sendMessage(ChatColor.GOLD + "Detected Server: " + ChatColor.GREEN + Bukkit.getName() + " " + Bukkit.getVersion());
         } catch (ArrayIndexOutOfBoundsException whatVersionAreYouUsingException) {
             whatVersionAreYouUsingException.printStackTrace();
