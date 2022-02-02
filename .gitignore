@@ -4,3 +4,5 @@
 # ...except the ones we want
 *.bat
 *.jar
+/.idea
+/out
