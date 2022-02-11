@@ -14,6 +14,8 @@ public class Fungsi {
     public static final String GET_JETPACK_IS_BURNING = "FJBurning";
     public static final String GET_CUSTOM_FUEL_ID = "FJCustomFuel";
 
+    public static final String GET_SPRINT_COUNT = "FJSprintCT";
+
     public static final String JETPACK_FUEL_VAR = "{#fuel}";
     public static final String JETPACK_FUEL_ITEM_VAR = "{#fuel_value}";
 

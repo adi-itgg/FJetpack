@@ -1,10 +1,10 @@
-package me.phantomxcraft.listenevents;
+package me.phantomxcraft.events;
 
-import me.phantomxcraft.UpdateChecker;
-import me.phantomxcraft.abstrak.CustomFuel;
-import me.phantomxcraft.abstrak.Jetpack;
-import me.phantomxcraft.abstrak.PlayerConfig;
-import me.phantomxcraft.kode.JetpackManager;
+import me.phantomxcraft.updater.UpdateChecker;
+import me.phantomxcraft.data.CustomFuel;
+import me.phantomxcraft.data.Jetpack;
+import me.phantomxcraft.data.PlayerConfig;
+import me.phantomxcraft.config.JetpackManager;
 import me.phantomxcraft.nms.ItemMetaData;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -23,10 +23,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -40,6 +37,7 @@ import java.util.*;
 import java.util.logging.Level;
 
 import static me.phantomxcraft.FJetpack.nmsServerVersion;
+import static me.phantomxcraft.FJetpack.serverVersion;
 import static me.phantomxcraft.utils.Fungsi.*;
 
 public class JetpackEvents extends JetpackManager implements Listener {
@@ -54,7 +52,8 @@ public class JetpackEvents extends JetpackManager implements Listener {
         if (jp != null && !jp.getOnDeath().equalsIgnoreCase("none") && !jp.getOnEmptyFuel().equalsIgnoreCase("none"))
             return;
         if (playerConfig.isDied()) return;
-        pesan(p, (!((LivingEntity) p).isOnGround() || p.isFlying()) ? Jetpackdilepas : PesanJetpackMati);
+        String msg = (!((LivingEntity) p).isOnGround() || p.isFlying()) ? Jetpackdilepas : PesanJetpackMati;
+        if (!msg.equals(PrefixPesan)) pesan(p, msg);
     }
 
     public static void DelPFly(Player p) {
@@ -140,10 +139,12 @@ public class JetpackEvents extends JetpackManager implements Listener {
         Boolean bool = playerMsged.get(p.getUniqueId());
         if (bool != null && bool) return;
         playerMsged.put(p.getUniqueId(), true);
-        if (onEmptyListener)
-            p.sendMessage(listener.equalsIgnoreCase("drop") ? JetpackManager.OnEmptyFuelDropped : JetpackManager.OnEmptyFuelRemoved);
-        if (!onEmptyListener)
-            p.sendMessage(listener.equalsIgnoreCase("drop") ? JetpackManager.OnDeathDropped : JetpackManager.OnDeathRemoved);
+        String msg = onEmptyListener ?
+                listener.equalsIgnoreCase("drop") ? JetpackManager.OnEmptyFuelDropped : JetpackManager.OnEmptyFuelRemoved
+                :
+                listener.equalsIgnoreCase("drop") ? JetpackManager.OnDeathDropped : JetpackManager.OnDeathRemoved;
+        if (!msg.equals(PrefixPesan))
+            pesan(p, msg);
         final UUID uuid = p.getUniqueId();
         new BukkitRunnable() {
             @Override
@@ -153,7 +154,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
         }.runTaskLaterAsynchronously(getPlugin(),  40L);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     private void onRespawn(PlayerRespawnEvent e) {
         try {
             playerMsged.put(e.getPlayer().getUniqueId(), false);
@@ -162,7 +163,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     private void onDeath(PlayerDeathEvent e) {
         try {
             if (e.getEntity().getType() != EntityType.PLAYER) return;
@@ -209,7 +210,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     private void onDamagedPlayerArmor(EntityDamageEvent e) {
         try {
             Entity entity = e.getEntity();
@@ -225,7 +226,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
                 if (eqc == null || eqc.getType() == Material.AIR) continue;
                 Jetpack jetpack = JetpackManager.jetpacksLoaded.get(ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_NAME));
                 if (jetpack == null) continue;
-                if (nmsServerVersion.startsWith("v1_17_") || nmsServerVersion.startsWith("v1_18_")) {
+                if (serverVersion > 16) {
                     ItemMeta im = eqc.getItemMeta();
                     if (im != null) {
                         im.setUnbreakable(jetpack.isUnbreakable());
@@ -235,30 +236,29 @@ public class JetpackEvents extends JetpackManager implements Listener {
                     eqc.setDurability((short) 0);
                 eq.setArmorContents(updateItemsFJP(armors, eqc));
             }
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    private void onInventoryClose(final @NotNull InventoryCloseEvent e) {
+    private void onInventoryClose(@NotNull InventoryCloseEvent e) {
         try {
             Player p = (Player) e.getPlayer();
             if (!plist.contains(p)) return;
             EntityEquipment eq = p.getEquipment();
             if (eq == null) return;
             if (eq.getArmorContents().length < 1) {
-                if (plist.contains(p)) pesan(p, Jetpackdilepas);
+                if (plist.contains(p))
+                    if (!Jetpackdilepas.equals(PrefixPesan)) pesan(p, Jetpackdilepas);
                 DelPFly(p);
             }
         } catch (Exception ignored) {
-
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    private void onInventoryClick(final @NotNull InventoryClickEvent e) {
+    private void onInventoryClick(@NotNull InventoryClickEvent e) {
         if (e instanceof InventoryCreativeEvent) return;
         Player p = (Player) e.getWhoClicked();
         try {
@@ -289,7 +289,8 @@ public class JetpackEvents extends JetpackManager implements Listener {
             }
 
             if (eq != null && eq.getArmorContents().length < 1 && plist.contains(p)) {
-                if (plist.contains(p)) pesan(p, Jetpackdilepas);
+                if (plist.contains(p))
+                    if (!Jetpackdilepas.equals(PrefixPesan)) pesan(p, Jetpackdilepas);
                 DelPFly(p);
                 return;
             }
@@ -304,7 +305,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
             Jetpack jetpack = JetpackManager.jetpacksLoaded.get(ItemMetaData.getItemMetaDataString(item, GET_JETPACK_NAME));
             if (jetpack == null) return;
             if (!p.hasPermission(jetpack.getPermission()) && !p.hasPermission(jetpack.getPermission() + ".refuel")) {
-                pesan(p, TidakAdaAkses);
+                if (!TidakAdaAkses.equals(PrefixPesan)) pesan(p, TidakAdaAkses);
                 return;
             }
             if (e.getCursor() == null || e.getCurrentItem() == null || item.getAmount() == 0) return;
@@ -316,7 +317,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
                 CustomFuel customFuel = JetpackManager.customFuelsLoaded.get(idCf.substring(1));
                 if (customFuel == null) return;
                 if (!p.hasPermission(customFuel.getPermission())) {
-                    p.sendMessage(JetpackManager.PrefixPesan + ChatColor.RED + JetpackManager.TidakAdaAkses);
+                    if (!TidakAdaAkses.equals(PrefixPesan)) pesan(p, TidakAdaAkses);
                     return;
                 }
             } else {
@@ -362,13 +363,12 @@ public class JetpackEvents extends JetpackManager implements Listener {
                         !((LivingEntity) p).isOnGround() || p.isSneaking())
                     continue;
 
-
                 Jetpack jetpack = JetpackManager.jetpacksLoaded.get(ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_NAME));
                 if (jetpack == null) continue;
                 // new Method
                 // Cek Permis Player
                 if (!e.getPlayer().hasPermission(jetpack.getPermission()) && !e.getPlayer().hasPermission(jetpack.getPermission() + ".use")) {
-                    pesan(p, TidakAdaAkses);
+                    if (!TidakAdaAkses.equals(PrefixPesan)) pesan(p, TidakAdaAkses);
                     return;
                 }
 
@@ -386,7 +386,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
                 // Cek Dunia di block
                 for (String blockWorld : jetpack.getWorldBlacklist()) {
                     if (!blockWorld.equals(p.getWorld().getName())) continue;
-                    pesan(p, DuniaDiBlokir);
+                    if (!DuniaDiBlokir.equals(PrefixPesan)) pesan(p, DuniaDiBlokir);
                     return;
                 }
 
@@ -400,14 +400,14 @@ public class JetpackEvents extends JetpackManager implements Listener {
                             String displayFuel = jetpack.getFuel().replace("_", " ");
                             fuelNow = getIntOnly(ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_FUEL), 0);
                             if (fuelNow < jetpack.getFuelAmout()) {
-                                pesan(p, TidakAdaBensin.replaceAll("%fuel_item%", displayFuel));
+                                if (!TidakAdaBensin.equals(PrefixPesan)) pesan(p, TidakAdaBensin.replaceAll("%fuel_item%", displayFuel));
                                 return;
                             }
                         }
                     } else {
                         fuelNow = getIntOnly(ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_FUEL), 0);
                         if (fuelNow < jetpack.getFuelAmout()) {
-                            pesan(p, TidakAdaBensin.replaceAll("%fuel_item%", translateCodes(customFuelsLoaded.get(jetpack.getFuel().substring(1)).getDisplayName())));
+                            if (!TidakAdaBensin.equals(PrefixPesan)) pesan(p, TidakAdaBensin.replaceAll("%fuel_item%", translateCodes(customFuelsLoaded.get(jetpack.getFuel().substring(1)).getDisplayName())));
                             return;
                         }
                     }
@@ -423,7 +423,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
 
                 p.setAllowFlight(true);
                 p.setFlySpeed(Float.parseFloat(jetpack.getSpeed()) / 10.0F);
-                pesan(p, PesanJetpackAktif);
+                if (!PesanJetpackAktif.equals(PrefixPesan)) pesan(p, PesanJetpackAktif);
                 plist.add(p);
 
                 String burnStatus = ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_IS_BURNING);
@@ -441,6 +441,45 @@ public class JetpackEvents extends JetpackManager implements Listener {
 
     }
 
+    /*@EventHandler
+    private void onPlayerSprint(@NotNull PlayerToggleSprintEvent e) {
+        try {
+            Player p = e.getPlayer();
+            if (!p.isFlying()) return;
+            EntityEquipment eq = p.getEquipment();
+            if (eq == null || eq.getArmorContents().length == 0) return;
+            ItemStack[] armors = eq.getArmorContents();
+            Iterator<ItemStack> it = Arrays.stream(armors).iterator();
+            while (it.hasNext()) {
+                ItemStack eqc = it.next();
+                if (eqc == null || eqc.getType() == Material.AIR) continue;
+                String jpNameItem = ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_FUEL);
+                if (jpNameItem.equalsIgnoreCase(STRING_EMPTY)) continue;
+
+                Jetpack jetpack = jetpacksLoaded.get(jpNameItem);
+                if (jetpack == null) continue;
+                if (!jetpack.isCanSprintBypass()) continue;
+                //int c = getIntOnly(ItemMetaData.getItemMetaDataString(eqc, GET_SPRINT_COUNT), 0);
+                //c++;
+                //eqc = ItemMetaData.setItemMetaDataString(eqc, GET_SPRINT_COUNT, String.valueOf(c));
+
+                int FuelValNow = getIntOnly(ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_FUEL), 0);
+                if (FuelValNow < jetpack.getFuelCostFlySprint()) {
+                    if (!BahanBakarHabis.equals(PrefixPesan)) pesan(p, BahanBakarHabis);
+                    return;
+                }
+                FuelValNow = FuelValNow - jetpack.getFuelCostFlySprint();
+
+                String newFuelVal = String.valueOf(FuelValNow);
+                eqc = updateLore(eqc, eqc.getItemMeta(), newFuelVal, jetpack);
+
+                updateItemsFJP(armors, eqc);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }*/
+
     private ItemStack[] updateItemsFJP(ItemStack[] itemStacks, ItemStack jpItem) {
         int index = -1;
         for (ItemStack itemStack : itemStacks) {
@@ -456,7 +495,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
         return itemStacks;
     }
 
-    private BukkitTask BakarBahanBakarTask(Player p, @NotNull Jetpack jetpack) {
+    private BukkitTask BakarBahanBakarTask(Player p, @NotNull Jetpack jp) {
         return new BukkitRunnable() {
             @Override
             public void run() {
@@ -479,6 +518,8 @@ public class JetpackEvents extends JetpackManager implements Listener {
                         return;
                     }
 
+                    Jetpack jetpack = jetpacksLoaded.get(jp.getName());
+
                     for (ItemStack eqc : armors) {
                         if (eqc == null || eqc.getType() == Material.AIR) continue;
                         String jpNameItem = ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_FUEL);
@@ -499,19 +540,34 @@ public class JetpackEvents extends JetpackManager implements Listener {
                         try {
                             for (String worldBlock : jetpack.getWorldBlacklist()) {
                                 if (!p.getWorld().getName().equalsIgnoreCase(worldBlock)) continue;
-                                pesan(p, DuniaDiBlokir);
+                                if (!DuniaDiBlokir.equals(PrefixPesan)) pesan(p, DuniaDiBlokir);
                                 cancel();
                                 return;
                             }
 
                             int FuelValNow = getIntOnly(ItemMetaData.getItemMetaDataString(eqc, GET_JETPACK_FUEL), 0);
-                            if (FuelValNow < jetpack.getFuelAmout()) {
-                                pesan(p, BahanBakarHabis);
-                                onJetpackPlayerListener(p, eqc, true, jetpack.getOnEmptyFuel());
-                                cancel();
-                                return;
+
+                            if (!jetpack.isCanBypass() || !p.hasPermission(jetpack.getPermission() + ".bypass")) {
+                                if (FuelValNow < jetpack.getFuelAmout()) {
+                                    if (!BahanBakarHabis.equals(PrefixPesan)) pesan(p, BahanBakarHabis);
+                                    onJetpackPlayerListener(p, eqc, true, jetpack.getOnEmptyFuel());
+                                    cancel();
+                                    return;
+                                }
+                                FuelValNow = FuelValNow - jetpack.getFuelAmout();
                             }
-                            String newFuelVal = String.valueOf(FuelValNow - jetpack.getFuelAmout());
+
+                            if ((!jetpack.isCanSprintBypass() || !p.hasPermission(jetpack.getPermission() + ".sprintbypass")) && p.isSprinting()) {
+                                if (FuelValNow < jetpack.getFuelCostFlySprint()) {
+                                    if (!BahanBakarHabis.equals(PrefixPesan)) pesan(p, BahanBakarHabis);
+                                    onJetpackPlayerListener(p, eqc, true, jetpack.getOnEmptyFuel());
+                                    cancel();
+                                    return;
+                                }
+                                FuelValNow = FuelValNow - jetpack.getFuelCostFlySprint();
+                            }
+
+                            String newFuelVal = String.valueOf(FuelValNow);
                             eqc = updateLore(eqc, eqm, newFuelVal, jetpack);
                             if (p.getEquipment() == null || p.getEquipment().getArmorContents().length < 1) {
                                 PCopot(p);
@@ -546,7 +602,7 @@ public class JetpackEvents extends JetpackManager implements Listener {
                 } catch (Exception ignored) {
                 }
             }
-        }.runTaskTimerAsynchronously(getPlugin(), jetpack.getBurnRate() * 20L, jetpack.getBurnRate() * 20L);
+        }.runTaskTimerAsynchronously(getPlugin(), jp.getBurnRate() * 20L, jp.getBurnRate() * 20L);
     }
 
     public static ItemStack updateLore(ItemStack eqc, ItemMeta eqm, String newFuelVal, Jetpack jetpack) {

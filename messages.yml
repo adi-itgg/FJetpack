@@ -1,5 +1,6 @@
 Messages:
   Prefix: "&8&l[&b&lFJetpack&8&l]&r "
+  # Leave Empty message will disable the message
   JetpackOn: "&a&lON"
   JetpackOff: "&4&lOFF"
   NoPerm: "&cYou don't have permission!"

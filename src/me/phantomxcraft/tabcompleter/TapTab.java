@@ -1,6 +1,6 @@
-package me.phantomxcraft;
+package me.phantomxcraft.tabcompleter;
 
-import me.phantomxcraft.kode.JetpackManager;
+import me.phantomxcraft.config.JetpackManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

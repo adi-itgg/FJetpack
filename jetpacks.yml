@@ -15,6 +15,12 @@ Jetpacks:
       # You can remove this lore or change the lore.
       - '&7Fuel: &a{#fuel_value} &b{#fuel}'
     Permission: fjetpack.vip
+    # Bypass fuel to unlimited add suffix permission .bypass
+    # example: fjetpack.vip.bypass
+    CanBypassFuel: true
+    # Bypass fuel sprint to unlimited add suffix permission .bypass
+    # example: fjetpack.vip.sprintbypass
+    CanBypassSprintFuel: false
     # Jetpack Item (Supports all armor items)
     JetpackItem: CHAINMAIL_CHESTPLATE
     # Unbreakable item?
@@ -32,6 +38,8 @@ Jetpacks:
     Fuel: "@CVIP"
     # Fuel Cost
     FuelCost: 1
+    # Fuel Cost When Flying Sprint
+    FuelCostFlySprint: 0
     # Fuel Burn Rate in seconds
     BurnRate: 5
     # Maximum speed value is -10 to 10!
@@ -68,12 +76,16 @@ Jetpacks:
       - ''
       - '&7Fuel: &a{#fuel_value} &b{#fuel}'
     Permission: fjetpack.member
-    JetpackItem: LEATHER_CHESTPLATE
+    CanBypassFuel: false
+    CanBypassSprintFuel: false
+    # Colored LEATHER format ITEM:Red.Green.Blue
+    JetpackItem: LEATHER_CHESTPLATE:255.0.0
     Unbreakable: false
     OnEmptyFuel: none
     OnDeath: none
     Fuel: Coal
     FuelCost: 1
+    FuelCostFlySprint: 0
     BurnRate: 5
     Speed: 1.0
     ParticleEffect: none

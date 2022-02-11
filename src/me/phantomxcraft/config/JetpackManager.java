@@ -1,7 +1,7 @@
-package me.phantomxcraft.kode;
+package me.phantomxcraft.config;
 
-import me.phantomxcraft.abstrak.CustomFuel;
-import me.phantomxcraft.abstrak.Jetpack;
+import me.phantomxcraft.data.CustomFuel;
+import me.phantomxcraft.data.Jetpack;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Particle;
@@ -104,47 +104,51 @@ public class JetpackManager {
             if (!jet.exists())
                 if (jet.getParentFile().mkdirs() || jet.getParentFile().exists()) getPlugin().saveResource(filename, false);
 
-            FileConfiguration jetpacksConfig = YamlConfiguration.loadConfiguration(jet);
-
+            FileConfiguration jpc = YamlConfiguration.loadConfiguration(jet);
+            
             jetpacksLoaded.clear();
             String jps = "Jetpacks";
-            ConfigurationSection configurationSection = jetpacksConfig.getConfigurationSection(jps);
-            if (configurationSection == null) throw new InvalidConfigurationException("Invalid Jetpacks Config!");
-            Set<String> j = configurationSection.getKeys(false);
+            ConfigurationSection csection = jpc.getConfigurationSection(jps);
+            if (csection == null) throw new InvalidConfigurationException("Invalid Jetpacks Config!");
+            Set<String> j = csection.getKeys(false);
             jps += ".";
             for (String s : j) {
+                String p = jps + s + ".";
                 if (!nmsServerVersion.startsWith("v1_8_")) {
                     try {
-                        if (!Objects.requireNonNull(jetpacksConfig.getString(jps + s + ".ParticleEffect")).equalsIgnoreCase("none")) {
+                        if (!Objects.requireNonNull(jpc.getString(p + "ParticleEffect")).equalsIgnoreCase("none")) {
                             @SuppressWarnings("unused")
-                            Particle Partikel = Particle.valueOf(Objects.requireNonNull(jetpacksConfig.getString(jps + s + ".ParticleEffect")).toUpperCase());
+                            Particle Partikel = Particle.valueOf(Objects.requireNonNull(jpc.getString(p + "ParticleEffect")).toUpperCase());
                         }
                     } catch (Exception partikelgagal) {
                         sender.sendMessage(PrefixPesan + ChatColor.YELLOW + "WARNING!: Invalid particle name! [" + s + " Jetpack] Server version doesn't support particle name!");
                         sender.sendMessage(PrefixPesan + ChatColor.YELLOW + "WARNING!: Invalid particle automatic set to Cloud");
-                        jetpacksConfig.set(jps + s + ".ParticleEffect", "CLOUD");
+                        jpc.set(p + "ParticleEffect", "CLOUD");
                     }
                 }
                 try {
                     jetpacksLoaded.put(s, new Jetpack(
-                            jetpacksConfig.getString(jps + s + ".Permission", "fjetpack." + s),
-                            Objects.requireNonNull(jetpacksConfig.getString(jps + s + ".Fuel")),
-                            jetpacksConfig.getInt(jps + s + ".FuelCost", 1),
-                            Objects.requireNonNull(jetpacksConfig.getString(jps + s + ".DisplayName")),
+                            jpc.getString(p + "Permission", "fjetpack." + s),
+                            jpc.getBoolean(p + "CanBypassFuel", false),
+                            jpc.getBoolean(p + "CanBypassSprintFuel", false),
+                            Objects.requireNonNull(jpc.getString(p + "Fuel")),
+                            jpc.getInt(p + "FuelCost", 1),
+                            jpc.getInt(p + "FuelCostFlySprint", 1),
+                            Objects.requireNonNull(jpc.getString(p + "DisplayName")),
                             s,
-                            Objects.requireNonNull(jetpacksConfig.getString(jps + s + ".Speed")),
-                            Objects.requireNonNull(jetpacksConfig.getString(jps + s + ".JetpackItem")),
-                            Objects.requireNonNull(jetpacksConfig.getString(jps + s + ".ParticleEffect")),
-                            jetpacksConfig.getInt(jps + s + ".ParticleAmount", 0),
-                            jetpacksConfig.getInt(jps + s + ".BurnRate", 5),
-                            Objects.requireNonNull(jetpacksConfig.getString(jps + s + ".ParticleDelay")),
-                            jetpacksConfig.getStringList(jps + s + ".Lore"),
-                            jetpacksConfig.getStringList(jps + s + ".Flags"),
-                            jetpacksConfig.getStringList(jps + s + ".Enchantments"),
-                            jetpacksConfig.getStringList(jps + s + ".WorldBlackList"),
-                            jetpacksConfig.getBoolean(jps + s + ".Unbreakable", false),
-                            jetpacksConfig.getString(jps + s + ".OnEmptyFuel", "None"),
-                            jetpacksConfig.getString(jps + s + ".OnDeath", "None")
+                            Objects.requireNonNull(jpc.getString(p + "Speed")),
+                            Objects.requireNonNull(jpc.getString(p + "JetpackItem")),
+                            Objects.requireNonNull(jpc.getString(p + "ParticleEffect")),
+                            jpc.getInt(p + "ParticleAmount", 0),
+                            jpc.getInt(p + "BurnRate", 5),
+                            Objects.requireNonNull(jpc.getString(p + "ParticleDelay")),
+                            jpc.getStringList(p + "Lore"),
+                            jpc.getStringList(p + "Flags"),
+                            jpc.getStringList(p + "Enchantments"),
+                            jpc.getStringList(p + "WorldBlackList"),
+                            jpc.getBoolean(p + "Unbreakable", false),
+                            jpc.getString(p + "OnEmptyFuel", "None"),
+                            jpc.getString(p + "OnDeath", "None")
                             ));
                     sender.sendMessage(PrefixPesan + ChatColor.GREEN + "Loaded: " + s + " Jetpack");
                 } catch (Exception eror) {
@@ -233,15 +237,16 @@ public class JetpackManager {
             Set<String> j = configurationSection.getKeys(false);
             fuels += ".";
             for (String s : j) {
+                String cfp =  fuels + s + ".";
                 try {
                     customFuelsLoaded.put(s,
                             new CustomFuel(s,
-                                    fuelsConfig.getString(fuels + s + ".CustomDisplay"),
-                                    fuelsConfig.getString(fuels + s + ".DisplayName"),
-                                    fuelsConfig.getString(fuels + s + ".Item"),
-                                    fuelsConfig.getString(fuels + s + ".Permission"),
-                                    fuelsConfig.getStringList(fuels + s + ".Lore"),
-                                    fuelsConfig.getBoolean(fuels + s + ".Glowing")
+                                    fuelsConfig.getString(cfp + "CustomDisplay"),
+                                    fuelsConfig.getString(cfp + "DisplayName"),
+                                    fuelsConfig.getString(cfp + "Item"),
+                                    fuelsConfig.getString(cfp + "Permission"),
+                                    fuelsConfig.getStringList(cfp + "Lore"),
+                                    fuelsConfig.getBoolean(cfp + "Glowing")
                             ));
                     sender.sendMessage(PrefixPesan + ChatColor.GREEN + "Loaded: " + s + " Custom Fuel");
                 } catch (Exception ex) {

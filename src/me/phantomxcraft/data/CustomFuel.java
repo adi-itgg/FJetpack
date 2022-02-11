@@ -1,4 +1,4 @@
-package me.phantomxcraft.abstrak;
+package me.phantomxcraft.data;
 
 import java.util.List;
 

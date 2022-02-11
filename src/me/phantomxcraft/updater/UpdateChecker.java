@@ -1,4 +1,4 @@
-package me.phantomxcraft;
+package me.phantomxcraft.updater;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;

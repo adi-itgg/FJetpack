@@ -1,17 +1,20 @@
-package me.phantomxcraft.abstrak;
+package me.phantomxcraft.data;
 
 import java.util.List;
 
 public class Jetpack {
     private final String Permission, Fuel, DisplayName, Name, Speed, JetpackItem, ParticleEffect, ParticleDelay, OnEmptyFuel, OnDeath;
-    private final int FuelAmout, ParticleAmount, BurnRate;
+    private final int FuelAmout, FuelCostFlySprint, ParticleAmount, BurnRate;
     private final List<String> Lore, Flags, Enchantments, WorldBlacklist;
-    private final boolean Unbreakable;
+    private final boolean CanBypass, CanSprintBypass, Unbreakable;
 
-    public Jetpack(String permission, String fuel, int fuelAmout, String displayName, String name, String speed, String jetpackItem, String particleEffect, int particleAmount, int burnRate, String particleDelay, List<String> lore, List<String> flags, List<String> enchantments, List<String> worldBlacklist, boolean unbreakable, String onEmptyFuel, String onDeath) {
+    public Jetpack(String permission, boolean canBypass, boolean canSprintBypass, String fuel, int fuelAmout, int fuelCostFlySprint, String displayName, String name, String speed, String jetpackItem, String particleEffect, int particleAmount, int burnRate, String particleDelay, List<String> lore, List<String> flags, List<String> enchantments, List<String> worldBlacklist, boolean unbreakable, String onEmptyFuel, String onDeath) {
         Permission = permission;
+        CanBypass = canBypass;
+        CanSprintBypass = canSprintBypass;
         Fuel = fuel;
         FuelAmout = fuelAmout;
+        FuelCostFlySprint = fuelCostFlySprint;
         DisplayName = displayName;
         Name = name;
         Speed = speed;
@@ -39,6 +42,10 @@ public class Jetpack {
 
     public int getFuelAmout() {
         return FuelAmout;
+    }
+
+    public int getFuelCostFlySprint() {
+        return FuelCostFlySprint;
     }
 
     public String getDisplayName() {
@@ -99,5 +106,13 @@ public class Jetpack {
 
     public String getOnDeath() {
         return OnDeath;
+    }
+
+    public boolean isCanBypass() {
+        return CanBypass;
+    }
+
+    public boolean isCanSprintBypass() {
+        return CanSprintBypass;
     }
 }

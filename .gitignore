@@ -2,5 +2,7 @@
 !*.*
 
 # ...except the ones we want
+/out/
+/.idea/
 *.bat
 *.jar
